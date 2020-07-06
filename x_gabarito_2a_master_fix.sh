@@ -1,4 +1,4 @@
-#!bash
+#!/bin/bash
 
 # corrigir a configuração do ARQUIVO ./kube/config para a PORTA 6443
 echo "Configuração do ARQUIVO ./kube/config para a PORTA 6443"
@@ -23,6 +23,7 @@ read ID_DOCKER
 docker logs $ID_DOCKER
 # error: unable to load client CA file: unable to load client CA file: open /etc/kubernetes/pki/ca-authority.crt: no suchfile or directory
 echo "Digite ENTER para continuar..."
+read OK
 echo "O erro esta na configuracao errada no: /etc/kubernetes/manifests/kube-apiserver.yaml"
 echo "esta apontando para o: /etc/kubernetes/pki/ca-authority.crt em vez : /etc/kubernetes/pki/ca.crt"
 echo "cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca-authority.crt"
@@ -31,5 +32,16 @@ cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca-authority.crt
 #LINHA_CERTA="- --client-ca-file=/etc/kubernetes/pki/ca.crt"
 #sed -i 's|.*--client-ca-file=/etc.*|    '$LINHA_CERTA'|' /etc/kubernetes/manifests/kube-apiserver.yaml
 sed -i 's|- --client-ca-file=/etc/kubernetes/pki/ca-authority.crt|- --client-ca-file=/etc/kubernetes/pki/ca.crt|' /etc/kubernetes/manifests/kube-apiserver.yaml
+echo "Digite ENTER para continuar..."
+read OK
+cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca.crt
 
 # corrigir a configuração do COREDNS
+# https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/
+kubectl get nodes
+echo "Digite ENTER para continuar..."
+read OK
+echo "O erro no node 01 que esta em modo manutencao. Vamos tirar"
+kubectl uncordon node01
+kubectl get nodes
+echo "FIM..."
