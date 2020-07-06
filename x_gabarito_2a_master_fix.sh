@@ -13,6 +13,7 @@ cat ./.kube/config | grep server
 echo "Digite ENTER para continuar..."
 read OK
 
+echo "--------"
 # corrigir a configuração do API SERVER:
 echo "Configuração do API SERVER"
 echo "docker ps -a | grep apiserver"
@@ -36,7 +37,18 @@ echo "Digite ENTER para continuar..."
 read OK
 cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca.crt
 
+echo "--------"
 # corrigir a configuração do COREDNS
+echo "O erro do DNS esta na configuracao errada da imagem definida"
+echo "kubectl get all -n kube-system | grep coredns"
+kubectl get all -n kube-system | grep coredns
+echo "kubectl get deploy -n kube-system -o json | grep image"
+kubectl get deploy -n kube-system -o json | grep image
+kubectl patch -n kube-system deploy coredns -p '{"spec":{"template":{"spec":{"containers":{"image":"k8s.gcr.io/coredns:1.3.1"}}}}}'
+kubectl get deploy -n kube-system -o json | grep image
+
+echo "--------"
+# corrigir a configuração do NODE01
 # https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/
 kubectl get nodes
 echo "Digite ENTER para continuar..."
