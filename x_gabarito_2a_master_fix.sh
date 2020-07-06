@@ -25,6 +25,10 @@ docker logs $ID_DOCKER
 echo "Digite ENTER para continuar..."
 echo "O erro esta na configuracao errada no: /etc/kubernetes/manifests/kube-apiserver.yaml"
 echo "esta apontando para o: /etc/kubernetes/pki/ca-authority.crt em vez : /etc/kubernetes/pki/ca.crt"
-sed -i 's|server: https:.*|server: https://'$IP_CLUSTER':6443|' /root/.kube/config
+echo "cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca-authority.crt"
+cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca-authority.crt
+LINHA_ERRADA="    - --client-ca-file=/etc/kubernetes/pki/ca-authority.crt"
+LINHA_CERTA="    - --client-ca-file=/etc/kubernetes/pki/ca.crt"
+sed -i 's|'$LINHA_ERRADA'|'$LINHA_CERTA'|' /etc/kubernetes/manifests/kube-apiserver.yaml
 
 # corrigir a configuração do COREDNS
