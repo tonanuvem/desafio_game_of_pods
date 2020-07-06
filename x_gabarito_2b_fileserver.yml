@@ -1,0 +1,226 @@
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+    name: drupal-service
+spec:
+    selector:
+        app: drupal
+    ports:
+    - nodePort: 30095
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    type: NodePort
+---
+#https://docs.openshift.com/container-platform/4.1/nodes/containers/nodes-containers-init.html
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drupal
+  labels:
+    app: drupal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drupal
+  template:
+    metadata:
+      labels:
+        app: drupal
+    spec:
+      initContainers:
+      - name: init-sites-volume
+        image: drupal:8.6
+        command: ['/bin/bash', '-c']
+        args: ['cp -r /var/www/html/sites/ /data/; chown www-data:www-data /data/ -R']
+        #command:
+        #    - /bin/bash
+        #    - "-c" 
+        #    - | 
+        #      cp -r /var/www/html/sites/ /data/
+        #      chown www-data:www-data /data/ -R
+        volumeMounts:
+        - name: drupal-pv-vol
+          mountPath: /data 
+      containers:
+      - name: drupal
+        image: drupal:8.6
+        env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: drupal-mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: drupal-mysql-secret
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: drupal-mysql-secret
+                  key: MYSQL_USER                  
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /var/www/html/modules
+          subPath: modules
+          name: drupal-pv-vol
+        - mountPath: /var/www/html/profiles
+          subPath: profiles
+          name: drupal-pv-vol
+        - mountPath: /var/www/html/sites
+          subPath: sites
+          name: drupal-pv-vol
+        - mountPath: /var/www/html/themes
+          subPath: themes
+          name: drupal-pv-vol
+      volumes:
+      - name: drupal-pv-vol
+        persistentVolumeClaim:
+          claimName: drupal-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drupal-mysql-service
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: drupal-mysql
+  clusterIP: None
+---
+# https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/#:~:text=Deploy%20MySQL,MySQL%20and%20references%20the%20PersistentVolumeClaim.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drupal-mysql
+  labels:
+    app: drupal-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drupal-mysql
+  template:
+    metadata:
+      labels:
+        app: drupal-mysql
+    spec:
+      containers:
+      - name: drupal-mysql
+        image: mysql:5.7
+        env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: drupal-mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: drupal-mysql-secret
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: drupal-mysql-secret
+                  key: MYSQL_USER                  
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        volumeMounts:
+        - name: drupal-mysql-dbdata
+          mountPath: /var/lib/mysql
+          subPath: dbdata
+      volumes:
+      - name: drupal-mysql-dbdata
+        persistentVolumeClaim:
+          claimName: drupal-mysql-pvc
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: drupal-mysql-secret
+type: Opaque
+data:
+    # $ echo -n 'root_password' | base64
+    #cm9vdF9wYXNzd29yZA==
+    # $ echo -n 'drupal-database' | base64
+    #ZHJ1cGFsLWRhdGFiYXNl
+    # $ echo -n 'root' | base64
+    #cm9vdA==
+  MYSQL_ROOT_PASSWORD: cm9vdF9wYXNzd29yZA==
+  MYSQL_DATABASE: ZHJ1cGFsLWRhdGFiYXNl
+  MYSQL_USER: cm9vdA==
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: drupal-mysql-pvc
+  #labels:
+  #  app: drupal-mysql
+spec:
+  storageClassName: manual
+  selector:
+    matchLabels:
+      storage-name: drupal-mysql-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: drupal-pvc
+  #labels:
+  #  app: drupal
+spec:
+  storageClassName: manual
+  selector:
+    matchLabels:
+      storage-name: drupal-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+ name: drupal-mysql-pv
+ labels: 
+    storage-name: drupal-mysql-pv
+    type: local
+spec:
+ storageClassName: manual
+ accessModes:
+  - ReadWriteOnce
+ capacity:
+  storage: 5Gi
+ hostPath:
+  path: /drupal-mysql-data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+ name: drupal-pv
+ labels: 
+    storage-name: drupal-pv
+    type: local
+spec:
+ storageClassName: manual
+ accessModes:
+  - ReadWriteOnce
+ capacity:
+  storage: 5Gi
+ hostPath:
+  path: /drupal-data
