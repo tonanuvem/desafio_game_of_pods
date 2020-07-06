@@ -3,7 +3,7 @@
 # corrigir a configuração do ARQUIVO ./kube/config para a PORTA 6443
 echo "Configuração do ARQUIVO ./kube/config para a PORTA 6443"
 echo "cat /root/.kube/config | grep server"
-cat ./.kube/config | grep server
+cat /root/.kube/config | grep server
 # ex:    server: https://172.17.0.66:2379
 echo 'Digite o IP que aparece acima (ex: 172.17.0.66)'
 read IP_CLUSTER
