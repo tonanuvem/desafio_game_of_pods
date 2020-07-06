@@ -44,7 +44,12 @@ echo "kubectl get all -n kube-system | grep coredns"
 kubectl get all -n kube-system | grep coredns
 echo "kubectl get deploy -n kube-system -o json | grep image"
 kubectl get deploy -n kube-system -o json | grep image
-kubectl patch -n kube-system deploy coredns -p '{"spec":{"template":{"spec":{"containers":{"image":"k8s.gcr.io/coredns:1.3.1"}}}}}'
+echo "Voce vai precisar editar o arquivo e corrigir a linha da imagem para: "image":"k8s.gcr.io/coredns:1.3.1""
+echo "Digite ENTER para continuar..."
+read OK
+kubectl edit -n kube-system deploy coredns
+#kubectl patch -n kube-system deploy coredns -p '{"spec":{"template":{"spec":{"containers":{"image":"k8s.gcr.io/coredns:1.3.1"}}}}}'
+#kubectl patch -n kube-system deploy coredns -p '{"spec":{"template":{"spec":{"containers":[{"name":"coredns2"}]}}}}'
 kubectl get deploy -n kube-system -o json | grep image
 
 echo "--------"
