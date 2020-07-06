@@ -22,21 +22,27 @@ docker ps -a | grep -E 'apiserver.*Exited'
 # ex:    b0f77aa5b682        3de571b6587b           "kube-apiserver --..."   About a minute ago   Exited (1) About a minute 
 echo 'Digite as 3 primeiras letras do ID Docker que aparece acima (ex: b0f77aa5b682)'
 read ID_DOCKER
-docker logs $ID_DOCKER
+echo 'Vamos imprimir as ultimas 10 linhas do LOG para identificar o erro'
+echo "Digite ENTER para continuar..."
+read OK
+docker logs --tail 10 $ID_DOCKER
 # error: unable to load client CA file: unable to load client CA file: open /etc/kubernetes/pki/ca-authority.crt: no suchfile or directory
 echo "Digite ENTER para continuar..."
 read OK
 echo "O erro esta na configuracao errada no: /etc/kubernetes/manifests/kube-apiserver.yaml"
 echo "esta apontando para o: /etc/kubernetes/pki/ca-authority.crt em vez : /etc/kubernetes/pki/ca.crt"
+echo "Digite ENTER para continuar..."
+read OK
 echo "cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca-authority.crt"
 cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca-authority.crt
 #LINHA_ERRADA="- --client-ca-file=/etc/kubernetes/pki/ca-authority.crt"
 #LINHA_CERTA="- --client-ca-file=/etc/kubernetes/pki/ca.crt"
 #sed -i 's|.*--client-ca-file=/etc.*|    '$LINHA_CERTA'|' /etc/kubernetes/manifests/kube-apiserver.yaml
 sed -i 's|- --client-ca-file=/etc/kubernetes/pki/ca-authority.crt|- --client-ca-file=/etc/kubernetes/pki/ca.crt|' /etc/kubernetes/manifests/kube-apiserver.yaml
+echo "cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca.crt"
+cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca.crt
 echo "Digite ENTER para continuar..."
 read OK
-cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep ca.crt
 
 echo "--------"
 # corrigir a configuração do COREDNS
