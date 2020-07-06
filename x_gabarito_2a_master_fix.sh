@@ -9,7 +9,8 @@ echo 'Digite o IP que aparece acima (ex: 172.17.0.66)'
 read IP_CLUSTER
 sed -i 's|server: https:.*|server: https://'$IP_CLUSTER':6443|' /root/.kube/config
 #sed -i 's|server: https:.*|server: https:'"$IP_CLUSTER"':6443|' /root/.kube/config
-cat ./.kube/config | grep server
+echo "cat /root/.kube/config | grep server"
+cat /root/.kube/config | grep server
 echo "Digite ENTER para continuar..."
 read OK
 
