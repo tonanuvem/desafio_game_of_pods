@@ -6,6 +6,7 @@ cat ./.kube/config | grep server
 echo 'Digite o IP que aparece acima (ex: 172.17.0.66)'
 read IP_CLUSTER
 sed -i 's|server: https:.*:2379|server: https:'$IP_CLUSTER':6443|' /root/.kube/config
+#sed -i 's|server: https:.*|server: https:'"$IP_CLUSTER"':6443|' /root/.kube/config
 
 # corrigir a configuração do API SERVER:
 
