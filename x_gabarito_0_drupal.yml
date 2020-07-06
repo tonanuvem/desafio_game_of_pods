@@ -67,18 +67,18 @@ spec:
         - containerPort: 80
           protocol: TCP
         volumeMounts:
-        - name: drupal-pv-vol
-          mountPath: /var/www/html/modules
+        - mountPath: /var/www/html/modules
           subPath: modules
-        - name: drupal-pv-vol
-          mountPath: /var/www/html/profiles
+          name: drupal-pv-vol
+        - mountPath: /var/www/html/profiles
           subPath: profiles
-        - name: drupal-pv-vol
-          mountPath: /var/www/html/sites
+          name: drupal-pv-vol
+        - mountPath: /var/www/html/sites
           subPath: sites
-        - name: drupal-pv-vol
-          mountPath: /var/www/html/themes
+          name: drupal-pv-vol
+        - mountPath: /var/www/html/themes
           subPath: themes
+          name: drupal-pv-vol
       volumes:
       - name: drupal-pv-vol
         persistentVolumeClaim:
