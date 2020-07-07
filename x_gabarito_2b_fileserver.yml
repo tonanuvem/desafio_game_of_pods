@@ -13,7 +13,7 @@ spec:
       targetPort: 8080
     type: NodePort
 ---
-apiVersion: batch/v1
+apiVersion: v1
 #apiVersion: apps/v1
 kind: Pod
 #kind: Deployment
@@ -27,9 +27,9 @@ spec:
   #  matchLabels:
   #    app: gop-fileserver
   template:
-    metadata:
-      labels:
-        app: gop-fileserver
+    #metadata:
+    #  labels:
+    #    app: gop-fileserver
     spec:
       containers:
       - name: gop-fileserver
