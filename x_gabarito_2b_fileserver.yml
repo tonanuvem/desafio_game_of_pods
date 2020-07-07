@@ -7,7 +7,7 @@ spec:
     selector:
         app: gop-fs-service
     ports:
-    - nodePort: 30095
+    - nodePort: 31200
       port: 8080
       protocol: TCP
       targetPort: 8080
@@ -15,13 +15,14 @@ spec:
 ---
 #https://docs.openshift.com/container-platform/4.1/nodes/containers/nodes-containers-init.html
 apiVersion: apps/v1
-kind: Deployment
+kind: Pod
+#kind: Deployment
 metadata:
   name: gop-fileserver
   labels:
     app: gop-fileserver
 spec:
-  replicas: 1
+  #replicas: 1
   selector:
     matchLabels:
       app: gop-fileserver
