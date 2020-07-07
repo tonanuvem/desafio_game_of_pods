@@ -5,7 +5,7 @@ metadata:
     name: gop-fs-service
 spec:
     selector:
-        app: gop-fs-service
+        app: gop-fileserver # This specification creates a new Service object named “my-service”, which targets TCP port 9376 on any Pod with the app=MyApp label.
     ports:
     - nodePort: 31200
       port: 8080
@@ -23,9 +23,9 @@ metadata:
     app: gop-fileserver
 spec:
   #replicas: 1
-  selector:
-    matchLabels:
-      app: gop-fileserver
+  #selector:
+  #  matchLabels:
+  #    app: gop-fileserver
   template:
     metadata:
       labels:
