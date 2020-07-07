@@ -26,11 +26,11 @@ spec:
   #selector:
   #  matchLabels:
   #    app: gop-fileserver
-  template:
+  #template:
     #metadata:
     #  labels:
     #    app: gop-fileserver
-    spec:
+    #spec:
       containers:
       - name: gop-fileserver
         image: kodekloud/fileserver                
